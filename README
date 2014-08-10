@@ -1,0 +1,75 @@
+
+      SubmitR Test Pack
+
+The following files can be used to test and demonstrate various
+features of SubmitR: 
+
+  test1.R		- Job run R script
+  postproc.R		- Post-processing R script
+  data.one		- Static (single) data file
+  data.template		- Variable data file
+  parameters.def 	- Parameter definition file
+
+Here are some test cases / demonstration scenarios:   
+
+Scenario A - Single job, parameters on cmd. line
+  R Script: 		"test1.R"
+  Script Args:		"1 2"
+  Results: 		"...Outputs= 3", Rplots.pdf created
+  
+Scenario B - Single job, parameters in data file
+  R Script: 		"test1.R"
+  Script Args:		"data.one"
+  Results: 		"...Outputs= 3", Rplots.pdf created
+
+Scenario C - Parallel job, parameters on command line
+  R Script: 		"test1.R"
+  Script Args:		"1 2 snow"
+  Results: 		"...[50 node names]...Outputs= 3", Rplots.pdf created
+  Note:			Side effect? <jobnum>.stderr: "...Connection to lifeline...lost"
+  
+Scenario D - Sweep job, variable command line
+  R Script: 		"test1.R"
+  Sweep phrase:		1:"1-2", 2:"3"
+  Results: 		2 runs, "...Outputs=...[4,5]",  Rplots.pdf's created
+
+Scenario E - Sweep job, data file template
+  R Script: 		"test1.R"
+  Sweep phrase:		1:"1-2", 2:"3" 3:"./data.template"
+  ID in Data File	1:"param1", 2:"param2"
+  Data File Template:	"data.template"
+
+Scenario F - Sweep job, parameter definition file
+  R Script: 		"test1.R"
+  Static Args:		"@@param1 @@param2"
+  Param. Def. File:	"parameters.def"
+  Results: 		4 runs, "...Outputs=...[4,5,5,6]",  Rplots.pdf's created
+
+Scenario G - Sweep job, post-processing
+  R Script: 		"test1.R"
+  Sweep phrase:		1:"1-2", 2:"3"
+  Post-pr.: R Script:	"postproc.R"
+  Post-pr.: Script Args:"$ndir" 
+  Display PDF's?	checked
+  Results: 		2 runs, "...Outputs=...[4,5]", 
+			Post-pr. run, "...[1] 4 5...",  3 PDFs appear
+  
+Scenario H - Sweep job, data file name changes
+  R Script: 		"test1.R"
+  Script Args:		"@@param1"
+  Param. Def. File:	"datafilesp.def"
+  Results: 		2 runs, "...Outputs=...[3,7]", 
+ 
+
+This is a list of "submit" commands that was generate from test runs:
+
+1. submit --debug -M -n 1  -w 60 -v hansen                 R-2.15.1 CMD BATCH -q "--args 1 2" test1.R
+2. submit --debug -M -n 50 -w 20 -v hansen                 R-2.15.1 CMD BATCH -q "--args 1 2 snow" test1.R
+3. submit --debug -M -p submitr_params                     R-2.15.1 CMD BATCH -q "--args @@p1 @@p2" test1.R
+4. submit --debug -M -p submitr_params -i @:data.template  R-2.15.1 CMD BATCH -q "--args " test2.R
+5. submit --debug -M -p submitr_params -i @:data.template  R-2.15.1 CMD BATCH -q "--args @@p1" test1.R
+6. submit --debug -M -p parameters.def                     R-2.15.1 CMD BATCH -q "--args @@param1 @@param2" test1.R
+7. submit --debug -M -p parameters.def -i @:data.template  R-2.15.1 CMD BATCH -q "--args " test2.R
+8. submit --debug -M -p parameters.def -i @:data.template  R-2.15.1 CMD BATCH -q "--args data.template" test1.R
+9. submit --debug -M -p datafilesp.def -i data1 -i data2   R-2.15.1 CMD BATCH -q "--args data@@param1" test1.R
+
