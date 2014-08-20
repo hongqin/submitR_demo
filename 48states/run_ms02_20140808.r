@@ -15,6 +15,7 @@ table( tx==ty )
 tz = table(c( z[,1], z[,2]) )
 table( tz==ty )
 
+write.csv(z, "z.csv")
 
 #double-check
 
